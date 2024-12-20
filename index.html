@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <title>PlainFootball</title>
+</head>
+<body>
+  <div class="links">
+    <a href="#arsenal-women">Football</a>
+    <a href="#nfl">NFL</a>
+  </div>
+  <div id="arsenal-women" class="break">
+    <h1>Arsenal-Women</h1>
+  </div>
+  <div class="contain"> 
+    <div id="title_up3"><h2></h2></div>
+    <div class="upcoming" id="upcoming_3"></div>
+    <div id="title_re3"><h2></h2></div>
+    <div class="results" id="results_3"></div>
+  </div>
+  <div class="break">
+    <h1>England-Women</h1>
+  </div>
+  <div class="contain"> 
+    <div id="title_up4"><h2></h2></div>
+    <div class="upcoming" id="upcoming_4"></div>
+    <div id="title_re4"><h2></h2></div>
+    <div class="results" id="results_4"></div>
+  </div>
+  <div class="break">
+    <h1>UEFA-Womens-Champions-League</h1>
+  </div>
+  <div class="contain"> 
+    <div id="title_up2"><h2></h2></div>
+    <div class="upcoming" id="upcoming_2"></div>
+    <div id="title_re2"><h2></h2></div>
+    <div class="results" id="results_2"></div>
+  </div>
+  <div id="nfl" class="break">
+    <h1>NFL</h1>
+  </div>
+  <div class="contain"> 
+    <div id="title_up1"><h2></h2></div>
+    <div class="upcoming" id="upcoming_1"></div>
+    <div id="title_re1"><h2></h2></div>
+    <div class="results" id="results_1"></div>
+  </div>
+  <div class="break">
+    <h1>NCAA</h1>
+  </div>
+  <div class="contain"> 
+    <div id="title_up7"><h2></h2></div>
+    <div class="upcoming" id="upcoming_7"></div>
+    <div id="title_re7"><h2></h2></div>
+    <div class="results" id="results_7"></div>
+  </div>
+
+  <div class="break">
+    <h1>FA-Womens-Challenge-Cup</h1>
+  </div>
+  <div class="contain"> 
+    <div id="title_up5"><h2></h2></div>
+    <div class="upcoming" id="upcoming_5"></div>
+    <div id="title_re5"><h2></h2></div>
+    <div class="results" id="results_5"></div>
+  </div>
+
+  <div class="break">
+    <h1>English-Womens-Super-League</h1>
+  </div>
+  <div class="contain"> 
+    <div id="title_up6"><h2></h2></div>
+    <div class="upcoming" id="upcoming_6"></div>
+    <div id="title_re6"><h2></h2></div>
+    <div class="results" id="results_6"></div>
+  </div>
+
+  
+  <script>
+    // Replace this URL with the URL of the CORS-enabled website or API.
+    
+    function convertAdd(time12h){
+      const [time, modifier] = time12h.split(/(?<=\d)(am|pm)/i);
+      let [hours, minutes] = time.split(":").map(Number);
+
+      if(modifier.toLowerCase() === "pm" && hours !== 12){
+        hours+=12;
+      } 
+      if(modifier.toLowerCase() === "am" && hours === 12){
+        hours = 0;
+      }
+      hours = (hours + 1) % 24;
+
+      const hoursStr = String(hours).padStart(2, "0");
+      const minutesStr = String(minutes).padStart(2, "0");
+      
+      return `${hoursStr}:${minutesStr}`;
+    
+
+    }
+
+
+    function upload(url, title1, title2, upcoming, results, start){
+      fetch(url)
+        .then(response => response.text())
+        .then(htmlString => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(htmlString, 'text/html');
+
+          var extractedText = doc.querySelectorAll('td'); 
+          console.log(extractedText);
+          console.log(extractedText.length);
+          document.getElementById(title1).innerHTML = '<h2>Upcoming</h2>';
+
+          var i=start;
+          for(i=i; i<extractedText.length; i=i+6){
+          
+          if(extractedText[i].textContent.trim() == 'Results') {
+            break;
+          };
+          if(extractedText[i].textContent.trim() == 'None...'){
+            document.getElementById(upcoming).innerHTML+= (
+            '<table>' +
+                '<tr>'+
+                '<td>' + extractedText[i].innerText.replace(/\s/g, '') + 
+            '</table>')
+            i++;
+            break;
+          };
+
+          document.getElementById(upcoming).innerHTML+= (
+            '<table>' +
+                '<tr>'+
+                '<td>' + extractedText[i].innerText.replace(/\s/g, '') + '</td>' +
+                '<td>' +extractedText[i+1].innerText.trim() + '</td>' +
+                '<td>' +extractedText[i+2].innerText.replace(/\s/g, '') + '</td>' +
+                '<td>' +extractedText[i+3].innerText.trim() +'</td>' +
+                '<td>' + convertAdd(extractedText[i+5].innerText) + '</td>' +
+                '</tr>' + '</table>' 
+          )  
+          };
+          document.getElementById(title2).innerHTML = '<h2>Results</h2>';
+
+          
+          console.log(extractedText[i].innerText) 
+          for(let j=i+1; j<extractedText.length; j=j+6){
+            if(extractedText[j].textContent.trim().length >8 || extractedText[j].textContent.trim().length <5){
+              break;
+            }
+            document.getElementById(results).innerHTML+= (
+                '<table>' +
+                '<tr>'+
+                '<td>' + extractedText[j].innerText.replace(/\s/g, '') + '</td>' +
+                '<td>' +extractedText[j+1].innerText.trim() + '</td>' +
+                '<td>' +extractedText[j+2].innerText.replace(/\s/g, '') + '</td>' +
+                '<td>' +extractedText[j+3].innerText.trim()+'</td>' +
+                '</tr>' + '</table>' 
+                
+            )  
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching or parsing:', error);
+          document.getElementById('content').innerText = 'Failed to load data.';
+        });
+      }
+      upload('https://www.thesportsdb.com/team/140219-Arsenal-WFC', 'title_up3', 'title_re3', 'upcoming_3', 'results_3', 1);
+      upload('https://www.thesportsdb.com/team/136811-England-Women', 'title_up4', 'title_re4', 'upcoming_4', 'results_4', 1);
+      upload('https://www.thesportsdb.com/league/4889-UEFA-Womens-Champions-League', 'title_up2', 'title_re2', 'upcoming_2', 'results_2', 0);
+      upload('https://www.thesportsdb.com/league/4391-NFL', 'title_up1', 'title_re1', 'upcoming_1', 'results_1', 0);
+      upload('https://www.thesportsdb.com/league/5441-FA-Womens-Challenge-Cup', 'title_up5', 'title_re5', 'upcoming_5', 'results_5', 0);
+      upload('https://www.thesportsdb.com/league/4849-English-Womens-Super-League', 'title_up6', 'title_re6', 'upcoming_6', 'results_6', 0);
+      upload('https://www.thesportsdb.com/league/4479-NCAA-Division-1', 'title_up7', 'title_re7', 'upcoming_7', 'results_7', 0);
+
+      
+
+  </script>
+</body>
+</html>
